@@ -47,14 +47,16 @@ public class LocationServiceAspects {
         if (cDeviceLocationVerificationRequest.getUserEmail() == null || cDeviceLocationVerificationRequest.getUserEmail().isEmpty())
             throw new InvalidArgumentException();
 
-        if (cDeviceLocationVerificationRequest.getMaxAge() < 0 || cDeviceLocationVerificationRequest.getMaxAge() == 0)
-            throw new InvalidArgumentException();
+        if (cDeviceLocationVerificationRequest.getMaxAge() < 60  || cDeviceLocationVerificationRequest.getMaxAge() >120 )
+            throw new InvalidArgumentException("Max age should be between 60 and 120");
 
         if (cDeviceLocationVerificationRequest.getArea() == null)
             throw new InvalidArgumentException();
 
         if (cDeviceLocationVerificationRequest.getArea().getCenter() == null)
             throw new InvalidArgumentException();
+
+
 
         CValidations.validatePhoneNumber(cDeviceLocationVerificationRequest.getDevice().getPhoneNumber());
 

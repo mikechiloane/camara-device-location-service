@@ -41,10 +41,17 @@ public class LocationServiceImpl implements LocationService {
         User user = userClient.getUserIdByEmail(cDeviceLocationVerificationRequest.getUserEmail());
         DeviceDto device = deviceClient.getDeviceByUserId(user.getId());
         boolean isDeviceInArea = GeoUtils.isPointWithinRadius(device.getLocation().getPoint(), cDeviceLocationVerificationRequest.getArea().getCenter(), cDeviceLocationVerificationRequest.getArea().getRadius());
+        boolean isDeviceLocationRecent = calculateTimeDifferenceInSeconds(cDeviceLocationVerificationRequest.getMaxAge()) <= cDeviceLocationVerificationRequest.getMaxAge();
 
         return CDeviceLocationVerificationResponse.builder()
-                .verificationResult(isDeviceInArea ? VerificationResults.TRUE : VerificationResults.FALSE)
+                .verificationResult(isDeviceInArea && isDeviceLocationRecent ? VerificationResults.TRUE : VerificationResults.FALSE)
                 .build();
 
+    }
+
+    private static int calculateTimeDifferenceInSeconds(long maxAgeTime) {
+        long currentTime = System.currentTimeMillis();
+        long differenceInMillis = currentTime - maxAgeTime;
+        return (int) (differenceInMillis / 1000);
     }
 }

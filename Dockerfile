@@ -1,15 +1,12 @@
-# Stage 1: Build the application using Maven
 FROM maven:3.8.4-openjdk-17 as build
-COPY src /home/app/src
-COPY pom.xml /home/app
-RUN mvn -f /home/app/pom.xml clean package
 
-# Stage 2: Create the final image with OpenJDK 17
-FROM openjdk:17-jdk
-COPY --from=build /home/app/target/location-0.0.1-SNAPSHOT.jar /usr/local/lib/location-0.0.1-SNAPSHOT.jar
+COPY src /usr/src/location-service/src
+COPY pom.xml /usr/src/location-service
+RUN mvn -f /usr/src/location-service/pom.xml clean package -Dmaven.test.skip=true
 
-# Expose port 8084 for the application
-EXPOSE 8084
+FROM openjdk:17
 
-# Set the entry point as the Spring Boot application JAR file
-ENTRYPOINT ["java", "-jar", "/usr/local/lib/location-0.0.1-SNAPSHOT.jar"]
+COPY --from=build /usr/src/location-service/target/device-location-0.0.1-SNAPSHOT.jar /usr/src/location-service/app.jar
+WORKDIR /usr/src/location-service
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
